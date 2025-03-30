@@ -1,0 +1,103 @@
+name: Secure CI pipeline
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'kubernetes/deployment.yaml' # Ignore changes to this file for inf loop
+  pull_request:
+    branches: [ main ]
+
+env:
+  node-version: '20'
+
+jobs:
+  test:
+    name: Unit testing
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Code checkout
+        uses: actions/checkout@v4
+      
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${node-version}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run test cases
+        run: npm run test
+
+      - name: Linting
+        run: npm run lint
+      
+  # SAST: 
+  #   name: Static Application Security Testing
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Code checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: Qodana scan
+  #       uses: JetBrains/qodana-action@v2023.3
+  #       with:
+  #         args: --apply-fixes
+  #         pr-mode: false
+  #       env:
+  #         QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+  
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    needs: [ test ] # [ test, SAST ]
+
+    steps:
+      - name: Code checkout
+        uses: actions/checkout@v4
+      
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${node-version}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build the application
+        run: npm run build
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: dist/
+  
+  docker-build:
+    name: Docker Build and Push
+    runs-on: ubuntu-latest
+    needs: [build]
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}
+    outputs:
+      image_tag: 
+
+    steps:
+      - name: Code checkout
+        uses: actions/checkout@v4
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      
+
+      
