@@ -26,5 +26,4 @@ dist-ssr
 # Custom
 .github/
 .kubernetes/
-Dockerfile
-.dockerignore
+
