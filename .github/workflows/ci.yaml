@@ -106,8 +106,27 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: true
+          push: false
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
+        
+      - name: Run vulnerability scan (Trivy)
+        uses: aquasecurity/trivy-action@Latest
+        with: 
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+      
+      - name: Push images to GHCR
+        run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
+      
+      - name: Output Image name
+        run: echo "image_tag=$(echo ${{ github.run_number }})" >> $GITHUB_OUTPUT
+      
+      
+
       
       
 
