@@ -110,7 +110,7 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
         
       - name: Run vulnerability scan (Trivy)
-        uses: aquasecurity/trivy-action@Latest
+        uses: aquasecurity/trivy-action@0.30.0
         with: 
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
           format: 'table'
@@ -125,7 +125,7 @@ jobs:
       - name: Output Image name
         run: echo "image_tag=$(echo ${{ github.run_number }})" >> $GITHUB_OUTPUT
       
-      
+
 
       
       
