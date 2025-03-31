@@ -12,6 +12,8 @@ RUN npm run build
 
 # App stage
 FROM nginx:${NGINX_VERSION}
+LABEL org.opencontainers.image.description="Project: DevSecOps Pipeline"
+LABEL org.opencontainers.image.description="Author: Siddhesh N"
 
 # runtime variables
 ENV USER_NAME=secUser
