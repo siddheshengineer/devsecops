@@ -108,6 +108,7 @@ jobs:
           context: .
           push: false
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.run_number }}
+          load: true
         
       - name: Run vulnerability scan (Trivy)
         uses: aquasecurity/trivy-action@0.30.0
